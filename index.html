@@ -1,1 +1,1205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Halawa POS</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Calibri, Arial, sans-serif; }
+        body { background: #f1f5f9; height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
 
+        .pos-container {
+            width: 100%;
+            max-width: 1400px;
+            height: 92vh;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.2);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- HEADER GLOBAL --- */
+        .global-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 10;
+            border-radius: 24px 24px 0 0;
+        }
+        .global-header .brand { font-weight: 700; font-size: 18px; color: #0f172a; }
+        .global-header .datetime { margin-left: auto; font-size: 14px; color: #475569; font-weight: 500; }
+
+        /* Tombol Edit di Header */
+        .btn-header-edit {
+            padding: 4px 12px;
+            font-size: 12px;
+            margin-left: 12px;
+            border-radius: 8px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-header-edit:hover { background: #d97706; transform: translateY(-1px); }
+
+        /* --- PANEL KIRI --- */
+        .product-panel {
+            width: 55%;
+            height: 100%;
+            padding: 20px 20px 20px 24px;
+            padding-top: 65px;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            transition: width 0.2s ease;
+            position: relative;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .panel-header h2 { font-size: 20px; font-weight: 700; color: #0f172a; }
+        .search-box input {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 40px;
+            width: 200px;
+            outline: none;
+            transition: 0.3s;
+            background: #f8fafc;
+        }
+        .search-box input:focus { border-color: #2563eb; background: white; }
+
+        .product-grid-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            margin-bottom: 10px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .product-card {
+            background: white;
+            border: 1px solid #eef2f6;
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            height: 85px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .product-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -6px rgba(37, 99, 235, 0.15);
+        }
+        .product-name { font-weight: 600; font-size: 13px; color: #0f172a; margin-bottom: 4px; }
+        .product-price { font-weight: 700; color: #2563eb; font-size: 14px; }
+
+        .form-input-area {
+            background: #f0f4ff;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 2px solid #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        .input-bar-wrapper {
+            grid-column: span 2;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 4px 14px;
+            display: flex;
+            align-items: center;
+            height: 48px;
+            transition: 0.2s;
+        }
+        .input-bar-wrapper:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+        .input-bar-wrapper label {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 14px;
+            white-space: nowrap;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 140px;
+        }
+        .input-bar-wrapper select {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 600;
+            color: #0f172a;
+            outline: none;
+            cursor: pointer;
+            height: 100%;
+            text-align: left;
+        }
+        .input-bar-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 600;
+            color: #0f172a;
+            outline: none;
+            height: 100%;
+            text-align: right;
+            width: 100%;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .input-group label { font-size: 14px; font-weight: 700; color: #1e293b; }
+        .input-group input {
+            padding: 10px 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            background: white;
+            outline: none;
+            width: 100%;
+            transition: 0.2s;
+            height: 48px;
+            text-align: right;
+        }
+        .input-group input:focus { 
+            border-color: #2563eb; 
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .divider {
+            width: 8px;
+            background: #e2e8f0;
+            cursor: col-resize;
+            transition: background 0.2s;
+            position: relative;
+            z-index: 5;
+            flex-shrink: 0;
+            height: 100%;
+        }
+        .divider:hover, .divider.active { background: #2563eb; }
+
+        /* --- PANEL KANAN --- */
+        .cart-panel {
+            width: 45%;
+            height: 100%;
+            padding: 20px 24px 20px 20px;
+            padding-top: 65px;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.2s ease;
+        }
+
+        .nota-header {
+            background-color: #d6e8ca;
+            padding: 6px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: 16px;
+            border: 1px solid #b8d4a8;
+            border-bottom: none;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .header-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0px;
+            line-height: 1.1;
+        }
+        .header-right .day { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .header-right .date { font-size: 11px; font-weight: 400; color: #1e293b; margin-bottom: 2px; }
+        .header-right .badge {
+            background: #e2e8f0;
+            padding: 0 8px;
+            border-radius: 40px;
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .cart-table-wrap {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .cart-table th {
+            background: #eef2f6;
+            padding: 6px 4px;
+            text-align: left;
+            font-weight: 600;
+            color: #334155;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .cart-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+        .qty-control input {
+            width: 40px;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 4px 0;
+            font-size: 14px;
+            outline: none;
+            background: white;
+        }
+        .qty-control input:focus { border-color: #2563eb; }
+        .qty-btn {
+            background: #e2e8f0;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 16px;
+        }
+        .qty-btn:hover { background: #cbd5e1; }
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+        .remove-btn:hover { color: #dc2626; }
+
+        .summary-box {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .summary-flex {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .summary-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .summary-left .row {
+            display: flex;
+            justify-content: flex-start;
+            font-size: 13px;
+            color: #475569;
+        }
+        .summary-left .row span:first-child {
+            width: 130px;
+            font-weight: 500;
+        }
+        .summary-left .row span:last-child {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .summary-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+        }
+        .summary-right .row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 24px;
+            font-size: 14px;
+            color: #334155;
+        }
+        .summary-right .row span:first-child {
+            font-weight: 500;
+            text-align: right;
+        }
+        .summary-right .row span:last-child {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .summary-divider {
+            border-top: 1px solid #e2e8f0;
+            margin: 8px 0 4px;
+        }
+        .grand-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            padding-top: 4px;
+        }
+        .grand-total-row span:last-child { color: #2563eb; }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .btn-secondary { background: #e2e8f0; color: #475569; }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .btn-success { background: #16a34a; color: white; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2); }
+        .btn-success:hover { background: #15803d; transform: translateY(-2px); }
+        .btn-info { 
+            background: #3b82f6; 
+            color: white; 
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); 
+        }
+        .btn-info:hover { background: #2563eb; transform: translateY(-2px); }
+
+        /* --- MODAL EDIT DATA (POPUP YANG RAPI) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal-box {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 95%;
+            max-width: 1100px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .modal-header h3 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0f172a;
+        }
+        .modal-header p {
+            font-size: 13px;
+            color: #64748b;
+        }
+        .modal-table-wrap {
+            overflow: auto;
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 4px;
+        }
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 800px;
+        }
+        .modal-table th {
+            background: #f8fafc;
+            padding: 10px 6px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: #334155;
+        }
+        .modal-table td {
+            border: 1px solid #e2e8f0;
+            padding: 6px;
+            text-align: center;
+        }
+        .modal-table input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            background: white;
+            outline: none;
+            transition: 0.2s;
+        }
+        .modal-table input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        .btn-modal-close {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .btn-modal-close:hover { background: #cbd5e1; }
+        .btn-modal-save {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-modal-save:hover { background: #1d4ed8; transform: translateY(-2px); }
+
+        @media (max-width: 900px) {
+            .pos-container { flex-direction: column; height: auto; }
+            .divider { display: none; }
+            .product-panel { width: 100%; padding-top: 60px; height: auto; }
+            .cart-panel { width: 100%; padding-top: 20px; height: auto; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-input-area { grid-template-columns: 1fr; }
+            .input-bar-wrapper { grid-column: span 1; flex-wrap: wrap; height: auto; padding: 8px; }
+            .input-bar-wrapper label { min-width: 100px; }
+            .global-header { border-radius: 0; }
+            .summary-flex { flex-direction: column; }
+            .summary-left .row span:first-child { width: auto; }
+            .action-buttons { flex-direction: column; }
+            .modal-actions { flex-direction: column; }
+            .modal-box { max-height: 95vh; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="pos-container">
+
+    <!-- HEADER GLOBAL -->
+    <div class="global-header">
+        <div class="brand">Halawa POS</div>
+        <button class="btn-header-edit" onclick="bukaModalEdit()">⚙️ Edit Data</button>
+        <div class="datetime" id="dateTimeDisplay"></div>
+    </div>
+
+    <!-- PANEL KIRI -->
+    <div class="product-panel" id="leftPanel">
+        <div class="panel-header">
+            <h2>Katalog Produk</h2>
+            <div class="search-box">
+                <input type="text" placeholder="Cari produk..." id="searchInput" oninput="filterProduk()">
+            </div>
+        </div>
+
+        <div class="product-grid-wrapper">
+            <div class="product-grid" id="productGrid"></div>
+        </div>
+
+        <div class="form-input-area">
+            <div class="input-bar-wrapper">
+                <label>Pilih Ekspedisi :</label>
+                <select id="ekspedisiSelect" onchange="hitungUlangOngkir()">
+                    <option value="APM Logistics">APM Logistics</option>
+                    <option value="Baraka Express">Baraka Express</option>
+                    <option value="Buton Express">Buton Express</option>
+                    <option value="Diambil Sendiri">Diambil Sendiri</option>
+                    <option value="Duta Express">Duta Express</option>
+                    <option value="IDTruck" selected>IDTruck</option>
+                    <option value="Indah Logistik">Indah Logistik</option>
+                    <option value="JNE Express">JNE Express</option>
+                    <option value="JNE Trucking">JNE Trucking</option>
+                    <option value="JNT Cargo">JNT Cargo</option>
+                    <option value="JNT Express">JNT Express</option>
+                    <option value="KALOG">KALOG</option>
+                    <option value="Laris Cargo">Laris Cargo</option>
+                    <option value="LSJ Cargo">LSJ Cargo</option>
+                    <option value="Pangeran Express">Pangeran Express</option>
+                    <option value="Papandayan Cargo">Papandayan Cargo</option>
+                    <option value="Sajira Mahardika">Sajira Mahardika</option>
+                    <option value="Sentral Cargo">Sentral Cargo</option>
+                    <option value="TAM Cargo">TAM Cargo</option>
+                    <option value="Toyyib Logistik">Toyyib Logistik</option>
+                    <option value="Tri Tunggal">Tri Tunggal</option>
+                    <option value="Wahana">Wahana</option>
+                    <option value="CalistaExpress">CalistaExpress</option>
+                    <option value="Lion Parcel">Lion Parcel</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Ongkir / Kg (Otomatis)</label>
+                <input type="text" id="ongkirPerKg" value="0" oninput="formatOngkirInput(this, 'kg')" onfocus="if(this.value=='0') this.value=''" placeholder="Misal: 1500">
+            </div>
+            <div class="input-group">
+                <label>Ongkir Total (Manual)</label>
+                <input type="text" id="ongkirTotalInput" value="0" oninput="formatOngkirInput(this, 'total')" onfocus="if(this.value=='0') this.value=''" placeholder="Misal: 24000">
+            </div>
+            
+            <div class="input-bar-wrapper">
+                <label>Kelebihan bayar :</label>
+                <input type="text" id="kelebihanBayar" value="0" oninput="formatKelebihanInput(this)" onfocus="if(this.value=='0') this.value=''" placeholder="Misal: 50000">
+            </div>
+        </div>
+    </div>
+
+    <div class="divider" id="divider"></div>
+
+    <!-- PANEL KANAN -->
+    <div class="cart-panel" id="rightPanel">
+        
+        <div class="nota-header">
+            <div class="header-title">Rincian Pemesanan</div>
+            <div class="header-right">
+                <div class="day" id="headerDay">Senin</div>
+                <div class="date" id="headerDate">13 Jul 2026 | 10.18 WIB</div>
+                <div class="badge" id="cartCount">0</div>
+            </div>
+        </div>
+
+        <div class="cart-table-wrap">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th style="width:22%;">Deskripsi</th>
+                        <th style="width:14%; text-align:center;">QTY</th>
+                        <th style="width:14%; text-align:right;">Harga</th>
+                        <th style="width:12%; text-align:right;">Diskon</th>
+                        <th style="width:16%; text-align:right;">Harga Satuan</th>
+                        <th style="width:14%; text-align:right;">Total</th>
+                        <th style="width:8%;"></th>
+                    </tr>
+                </thead>
+                <tbody id="cartBody"></tbody>
+            </table>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-flex">
+                <div class="summary-left">
+                    <div class="row">
+                        <span>Ekspedisi</span>
+                        <span id="infoEkspedisi">IDTruck</span>
+                    </div>
+                    <div class="row">
+                        <span>Total Berat</span>
+                        <span id="infoBerat">0 Kg</span>
+                    </div>
+                    <div class="row">
+                        <span>Kelebihan bayar</span>
+                        <span id="infoKelebihan">Rp 0</span>
+                    </div>
+                </div>
+                <div class="summary-right">
+                    <div class="row">
+                        <span>Subtotal Produk</span>
+                        <span id="subtotalProduk">Rp 0</span>
+                    </div>
+                    <div class="row">
+                        <span>Ongkir</span>
+                        <span id="ongkirTotal">Rp 0</span>
+                    </div>
+                    <div class="row">
+                        <span>Diskon Ongkir</span>
+                        <span id="diskonOngkir">- Rp 0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="grand-total-row">
+                <span>Grand Total</span>
+                <span id="grandTotal">Rp 0</span>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="resetCart()">Reset</button>
+                <button class="btn btn-success" onclick="prosesBayar()">Proses Bayar</button>
+                <button class="btn btn-info" onclick="screenshotNota()">📷 Screenshot Nota</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDIT DATA PRODUK (POPUP) -->
+<div class="modal-overlay" id="modalEditProduk">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div>
+                <h3><span style="font-size:22px;">⚙️</span> Edit Data Produk</h3>
+                <p>Ubah nama, harga, berat, diskon, atau subsidi di bawah ini. Klik "Simpan" untuk menerapkan perubahan.</p>
+            </div>
+            <button class="btn btn-modal-close" onclick="tutupModalEdit()" style="padding: 6px 12px; font-size: 12px;">✕</button>
+        </div>
+
+        <div class="modal-table-wrap">
+            <table class="modal-table">
+                <thead>
+                    <tr>
+                        <th style="min-width:130px;">Nama Produk</th>
+                        <th style="width:80px;">Harga</th>
+                        <th style="width:70px;">Berat</th>
+                        <th style="width:70px;">Diskon<br>&lt;14</th>
+                        <th style="width:70px;">Diskon<br>14-49</th>
+                        <th style="width:70px;">Diskon<br>&gt;=50</th>
+                        <th style="width:70px;">Subsidi<br>&lt;14</th>
+                        <th style="width:70px;">Subsidi<br>14-49</th>
+                        <th style="width:70px;">Subsidi<br>&gt;=50</th>
+                    </tr>
+                </thead>
+                <tbody id="modalTableBody">
+                    <!-- Data produk akan dimuat oleh JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-modal-close" onclick="tutupModalEdit()" style="flex: 0 1 150px;">Batal</button>
+            <button class="btn btn-modal-save" onclick="simpanDataProduk()" style="flex: 0 1 200px;">💾 Simpan Perubahan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- DATA PRODUK DEFAULT ---
+    const defaultProdukData = [
+        { id: 1, nama: "Halawa rasa Ayam", harga: 384000, berat: 5.6, disc: [0.15, 0.2, 0.23], subsidi: [0, 9000, 9000] },
+        { id: 2, nama: "Halawa rasa Sapi", harga: 384000, berat: 5.6, disc: [0.15, 0.2, 0.23], subsidi: [0, 9000, 9000] },
+        { id: 3, nama: "Halawa rasa Jamur", harga: 384000, berat: 4.1, disc: [0.16, 0.21, 0.24], subsidi: [0, 9000, 9000] },
+        { id: 4, nama: "Halawa Ayam 500 g", harga: 400000, berat: 5.3, disc: [55000, 75000, 85000], subsidi: [0, 9000, 9000] },
+        { id: 5, nama: "Halawa Sapi 500 g", harga: 400000, berat: 5.3, disc: [55000, 75000, 85000], subsidi: [0, 9000, 9000] },
+        { id: 6, nama: "Halawa Ayam (Pack)", harga: 24000, berat: 0.35, disc: [0, 0, 0], subsidi: [0, 0, 0] },
+        { id: 7, nama: "Halawa Sapi (Pack)", harga: 24000, berat: 0.35, disc: [0, 0, 0], subsidi: [0, 0, 0] },
+        { id: 8, nama: "Halawa Jamur (Pack)", harga: 24000, berat: 0.27, disc: [0, 0, 0], subsidi: [0, 0, 0] }
+    ];
+
+    // Ambil data dari localStorage. Jika kosong, gunakan data default.
+    let produkData = JSON.parse(localStorage.getItem('pos_halawa_produkData')) || defaultProdukData;
+
+    let cart = [];
+
+    // --- UPDATE TANGGAL ---
+    function updateDateTime() {
+        const now = new Date();
+        const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        const dayName = days[now.getDay()];
+        const date = now.getDate();
+        const month = months[now.getMonth()];
+        const year = now.getFullYear();
+        const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        
+        const shortMonth = month.substring(0, 3);
+        const headerDateStr = `${date} ${shortMonth} ${year} | ${time} WIB`;
+        
+        document.getElementById('headerDay').textContent = dayName;
+        document.getElementById('headerDate').textContent = headerDateStr;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    function renderProduk(data) {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        data.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.onclick = () => tambahKeKeranjang(p);
+            card.innerHTML = `
+                <div class="product-name">${p.nama}</div>
+                <div class="product-price">Rp ${p.harga.toLocaleString()}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function filterProduk() {
+        const keyword = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = produkData.filter(p => p.nama.toLowerCase().includes(keyword));
+        renderProduk(filtered);
+    }
+
+    function tambahKeKeranjang(produk) {
+        const existing = cart.find(item => item.id === produk.id);
+        if (existing) existing.qty++;
+        else cart.push({ ...produk, qty: 1 });
+        renderCart();
+    }
+
+    function ubahQty(index, delta) {
+        if (cart[index].qty + delta <= 0) {
+            cart.splice(index, 1);
+        } else {
+            cart[index].qty += delta;
+        }
+        renderCart();
+    }
+
+    function updateQtyManual(index, value) {
+        let qty = parseInt(value);
+        if (isNaN(qty) || qty < 1) {
+            cart.splice(index, 1);
+        } else {
+            cart[index].qty = qty;
+        }
+        renderCart();
+    }
+
+    function hapusItem(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    function resetCart() {
+        if (cart.length === 0) return;
+        if (confirm('Kosongkan keranjang?')) {
+            cart = [];
+            document.getElementById('ongkirPerKg').value = '0';
+            document.getElementById('ongkirTotalInput').value = '0';
+            document.getElementById('kelebihanBayar').value = '0';
+            renderCart();
+        }
+    }
+
+    function getDiskon(produk, totalQty) {
+        if (totalQty < 14) return produk.disc[0];
+        if (totalQty < 50) return produk.disc[1];
+        return produk.disc[2];
+    }
+
+    function getSubsidi(produk, totalQty) {
+        if (totalQty < 14) return produk.subsidi[0];
+        if (totalQty < 50) return produk.subsidi[1];
+        return produk.subsidi[2];
+    }
+
+    function renderCart() {
+        const tbody = document.getElementById('cartBody');
+        const count = document.getElementById('cartCount');
+        tbody.innerHTML = '';
+        count.textContent = cart.reduce((s, i) => s + i.qty, 0);
+
+        if (cart.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Klik produk di katalog</td></tr>`;
+            hitungUlangOngkir();
+            return;
+        }
+
+        const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+
+        cart.forEach((item, idx) => {
+            const discPercent = getDiskon(item, totalQty);
+            let hargaSatuan;
+            if (typeof discPercent === 'number' && discPercent < 1) {
+                hargaSatuan = item.harga - (item.harga * discPercent);
+            } else {
+                hargaSatuan = item.harga - discPercent;
+            }
+            const totalItem = hargaSatuan * item.qty;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.nama}</td>
+                <td class="text-center">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="ubahQty(${idx}, -1)">−</button>
+                        <input type="number" min="1" value="${item.qty}" onchange="updateQtyManual(${idx}, this.value)">
+                        <button class="qty-btn" onclick="ubahQty(${idx}, 1)">+</button>
+                    </div>
+                </td>
+                <td class="text-right">${item.harga.toLocaleString()}</td>
+                <td class="text-right">${typeof discPercent === 'number' ? (discPercent < 1 ? (discPercent * 100)+'%' : 'Rp '+discPercent.toLocaleString()) : '-'}</td>
+                <td class="text-right">${hargaSatuan.toLocaleString()}</td>
+                <td class="text-right">${totalItem.toLocaleString()}</td>
+                <td class="text-center"><button class="remove-btn" onclick="hapusItem(${idx})">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        hitungUlangOngkir();
+    }
+
+    function pembulatanBerat(weight, ekspedisi) {
+        const special = ['JNE Express', 'Sentral Cargo', 'Wahana', 'Laris Cargo'];
+        const decimal = weight % 1;
+        const threshold = special.includes(ekspedisi) ? 0.1 : 0.2;
+        return decimal >= threshold ? Math.ceil(weight) : Math.floor(weight);
+    }
+
+    function formatOngkirInput(el, tipe) {
+        let clean = el.value.replace(/[^0-9]/g, '');
+        if (clean === '') clean = '0';
+        let num = parseInt(clean, 10);
+        if (tipe === 'kg' && num > 0) {
+            document.getElementById('ongkirTotalInput').value = '0';
+        } else if (tipe === 'total' && num > 0) {
+            document.getElementById('ongkirPerKg').value = '0';
+        }
+        el.value = num.toLocaleString('id-ID');
+        hitungUlangOngkir();
+    }
+
+    function formatKelebihanInput(el) {
+        let clean = el.value.replace(/[^0-9]/g, '');
+        if (clean === '') clean = '0';
+        let num = parseInt(clean, 10);
+        el.value = num.toLocaleString('id-ID');
+        hitungUlangOngkir();
+    }
+
+    function hitungUlangOngkir() {
+        let subtotal = 0;
+        let totalBeratAsli = 0;
+        cart.forEach(item => { totalBeratAsli += item.berat * item.qty; });
+        const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+
+        cart.forEach(item => {
+            const discPercent = getDiskon(item, totalQty);
+            let hargaSatuan;
+            if (typeof discPercent === 'number' && discPercent < 1) {
+                hargaSatuan = item.harga - (item.harga * discPercent);
+            } else {
+                hargaSatuan = item.harga - discPercent;
+            }
+            subtotal += hargaSatuan * item.qty;
+        });
+
+        const ekspedisi = document.getElementById('ekspedisiSelect').value;
+        const beratBulat = pembulatanBerat(totalBeratAsli, ekspedisi);
+
+        const ongkirKg = parseInt(document.getElementById('ongkirPerKg').value.replace(/[^0-9]/g, '')) || 0;
+        const ongkirTotalManual = parseInt(document.getElementById('ongkirTotalInput').value.replace(/[^0-9]/g, '')) || 0;
+        
+        let ongkir = 0;
+        if (ongkirKg > 0) {
+            if (ekspedisi.toLowerCase() === 'idtruck' && beratBulat < 10) {
+                ongkir = 10 * ongkirKg;
+            } else {
+                ongkir = beratBulat * ongkirKg;
+            }
+        } else if (ongkirTotalManual > 0) {
+            ongkir = ongkirTotalManual;
+        }
+
+        let totalSubsidi = 0;
+        cart.forEach(item => {
+            totalSubsidi += getSubsidi(item, totalQty) * item.qty;
+        });
+
+        let diskonOngkir = 0;
+        if (ekspedisi.toLowerCase() === 'idtruck') {
+            const maxFirst = ongkir * 0.2;
+            const maxSecond = ongkir * 0.8;
+            diskonOngkir = Math.min(maxFirst, ongkir) + Math.min(totalSubsidi, maxSecond);
+        } else {
+            diskonOngkir = Math.min(totalSubsidi, ongkir);
+        }
+
+        const kelebihan = parseInt(document.getElementById('kelebihanBayar').value.replace(/[^0-9]/g, '')) || 0;
+        const grandTotal = subtotal + ongkir - diskonOngkir - kelebihan;
+
+        document.getElementById('infoEkspedisi').textContent = ekspedisi;
+        document.getElementById('infoBerat').textContent = beratBulat + ' Kg';
+        document.getElementById('infoKelebihan').textContent = 'Rp ' + kelebihan.toLocaleString('id-ID');
+
+        document.getElementById('subtotalProduk').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+        document.getElementById('ongkirTotal').textContent = 'Rp ' + ongkir.toLocaleString('id-ID');
+        document.getElementById('diskonOngkir').textContent = '- Rp ' + diskonOngkir.toLocaleString('id-ID');
+        document.getElementById('grandTotal').textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
+    }
+
+    function prosesBayar() {
+        if (cart.length === 0) { alert('Keranjang masih kosong!'); return; }
+        printNota(false);
+    }
+
+    function screenshotNota() {
+        if (cart.length === 0) { alert('Keranjang masih kosong!'); return; }
+        printNota(true);
+    }
+
+    function printNota(ambilScreenshot) {
+        if (ambilScreenshot) {
+            const area = document.getElementById('rightPanel');
+            area.style.outline = '2px dashed #2563eb';
+            html2canvas(area, { scale: 2, useCORS: true, backgroundColor: '#f8fafc', allowTaint: false })
+            .then(canvas => {
+                area.style.outline = 'none';
+                canvas.toBlob(blob => {
+                    const item = new ClipboardItem({ "image/png": blob });
+                    navigator.clipboard.write([item])
+                        .then(() => alert('✅ Screenshot Rincian Pemesanan berhasil disalin ke clipboard!'))
+                        .catch(() => {
+                            const link = document.createElement('a');
+                            link.download = 'Rincian_Pemesanan.png';
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+                            alert('📁 Clipboard tidak diizinkan, gambar terdownload otomatis.');
+                        });
+                });
+            })
+            .catch(err => {
+                area.style.outline = 'none';
+                alert('❌ Gagal screenshot: ' + err.message);
+            });
+
+            cart = [];
+            renderCart();
+            document.getElementById('ongkirPerKg').value = '0';
+            document.getElementById('ongkirTotalInput').value = '0';
+            document.getElementById('kelebihanBayar').value = '0';
+            
+        } else {
+            const printWindow = window.open('', '_blank', 'width=500,height=700');
+            const ekspedisi = document.getElementById('ekspedisiSelect').value;
+            const dateStr = document.getElementById('headerDate').textContent;
+            
+            let itemRows = '';
+            const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+            cart.forEach(item => {
+                const discPercent = getDiskon(item, totalQty);
+                let hargaSatuan;
+                if (typeof discPercent === 'number' && discPercent < 1) {
+                    hargaSatuan = item.harga - (item.harga * discPercent);
+                } else {
+                    hargaSatuan = item.harga - discPercent;
+                }
+                const totalItem = hargaSatuan * item.qty;
+                itemRows += `
+                    <tr>
+                        <td style="padding: 4px 0; border-bottom: 1px dotted #ccc;">${item.nama}</td>
+                        <td style="padding: 4px 0; text-align: center; border-bottom: 1px dotted #ccc;">${item.qty}</td>
+                        <td style="padding: 4px 0; text-align: right; border-bottom: 1px dotted #ccc;">Rp ${hargaSatuan.toLocaleString('id-ID')}</td>
+                        <td style="padding: 4px 0; text-align: right; border-bottom: 1px dotted #ccc;">Rp ${totalItem.toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+            });
+
+            const notaHTML = `
+                <div style="font-family: 'Courier New', monospace; padding: 20px; max-width: 400px; margin: auto; background: white;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">Rincian Pemesanan</h2>
+                        <p style="margin: 2px 0; font-size: 12px;">${document.getElementById('headerDay').textContent}, ${dateStr}</p>
+                        <hr style="border: 0; border-top: 2px dashed #333;">
+                    </div>
+                    <div style="font-size: 13px;">
+                        <p><strong>Ekspedisi:</strong> ${ekspedisi}</p>
+                        <hr style="border: 0; border-top: 1px dashed #ccc;">
+                    </div>
+                    <table style="width: 100%; font-size: 12px; margin: 8px 0;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left;">Item</th>
+                                <th style="text-align: center;">Qty</th>
+                                <th style="text-align: right;">Harga</th>
+                                <th style="text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemRows}</tbody>
+                    </table>
+                    <hr style="border: 0; border-top: 1px dashed #ccc;">
+                    <div style="font-size: 13px; margin-top: 5px;">
+                        <div style="display: flex; justify-content: space-between;"><span>Subtotal</span><span>${document.getElementById('subtotalProduk').textContent}</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Ongkir</span><span>${document.getElementById('ongkirTotal').textContent}</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Diskon Ongkir</span><span>${document.getElementById('diskonOngkir').textContent}</span></div>
+                        <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; border-top: 2px solid #333; padding-top: 5px; margin-top: 5px;">
+                            <span>Grand Total</span><span>${document.getElementById('grandTotal').textContent}</span>
+                        </div>
+                    </div>
+                    <hr style="border: 0; border-top: 2px dashed #333; margin-top: 10px;">
+                    <p style="text-align: center; font-size: 11px; margin-top: 8px;">Jazakallahukhaiir telah berbelanja!</p>
+                </div>
+            `;
+            printWindow.document.write(notaHTML);
+            printWindow.document.close();
+            printWindow.print();
+
+            cart = [];
+            renderCart();
+            document.getElementById('ongkirPerKg').value = '0';
+            document.getElementById('ongkirTotalInput').value = '0';
+            document.getElementById('kelebihanBayar').value = '0';
+        }
+    }
+
+    const divider = document.getElementById('divider');
+    const leftPanel = document.getElementById('leftPanel');
+    const rightPanel = document.getElementById('rightPanel');
+    let isDragging = false;
+
+    divider.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        divider.classList.add('active');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const containerRect = document.querySelector('.pos-container').getBoundingClientRect();
+        const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+        if (newLeftWidth > 15 && newLeftWidth < 85) {
+            leftPanel.style.width = newLeftWidth + '%';
+            rightPanel.style.width = (100 - newLeftWidth) + '%';
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            divider.classList.remove('active');
+            document.body.style.cursor = 'default';
+            document.body.style.userSelect = 'auto';
+        }
+    });
+
+    // --- FUNGSI UNTUK MODAL EDIT DATA (POPUP RAPI) ---
+    function bukaModalEdit() {
+        const tbody = document.getElementById('modalTableBody');
+        tbody.innerHTML = '';
+        produkData.forEach((p, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" value="${p.nama}" id="edit_nama_${idx}" placeholder="Nama Produk"></td>
+                <td><input type="number" value="${p.harga}" id="edit_harga_${idx}" placeholder="Harga"></td>
+                <td><input type="number" step="0.01" value="${p.berat}" id="edit_berat_${idx}" placeholder="Berat"></td>
+                <td><input type="text" value="${p.disc[0]}" id="edit_disc0_${idx}" placeholder="Diskon <14"></td>
+                <td><input type="text" value="${p.disc[1]}" id="edit_disc1_${idx}" placeholder="Diskon 14-49"></td>
+                <td><input type="text" value="${p.disc[2]}" id="edit_disc2_${idx}" placeholder="Diskon >=50"></td>
+                <td><input type="text" value="${p.subsidi[0]}" id="edit_sub0_${idx}" placeholder="Subsidi <14"></td>
+                <td><input type="text" value="${p.subsidi[1]}" id="edit_sub1_${idx}" placeholder="Subsidi 14-49"></td>
+                <td><input type="text" value="${p.subsidi[2]}" id="edit_sub2_${idx}" placeholder="Subsidi >=50"></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('modalEditProduk').style.display = 'flex';
+    }
+
+    function tutupModalEdit() {
+        document.getElementById('modalEditProduk').style.display = 'none';
+    }
+
+    function simpanDataProduk() {
+        const newData = [];
+        produkData.forEach((p, idx) => {
+            const nama = document.getElementById(`edit_nama_${idx}`).value;
+            const harga = parseFloat(document.getElementById(`edit_harga_${idx}`).value) || 0;
+            const berat = parseFloat(document.getElementById(`edit_berat_${idx}`).value) || 0;
+            const disc0 = parseFloat(document.getElementById(`edit_disc0_${idx}`).value) || 0;
+            const disc1 = parseFloat(document.getElementById(`edit_disc1_${idx}`).value) || 0;
+            const disc2 = parseFloat(document.getElementById(`edit_disc2_${idx}`).value) || 0;
+            const sub0 = parseFloat(document.getElementById(`edit_sub0_${idx}`).value) || 0;
+            const sub1 = parseFloat(document.getElementById(`edit_sub1_${idx}`).value) || 0;
+            const sub2 = parseFloat(document.getElementById(`edit_sub2_${idx}`).value) || 0;
+
+            newData.push({
+                id: p.id,
+                nama: nama,
+                harga: harga,
+                berat: berat,
+                disc: [disc0, disc1, disc2],
+                subsidi: [sub0, sub1, sub2]
+            });
+        });
+        
+        localStorage.setItem('pos_halawa_produkData', JSON.stringify(newData));
+        produkData = newData;
+        
+        tutupModalEdit();
+        renderProduk(produkData);
+        renderCart();
+        alert('✅ Data produk berhasil disimpan!');
+    }
+
+    // --- INISIALISASI AWAL ---
+    renderProduk(produkData);
+
+    // --- REGISTRASI SERVICE WORKER (PWA) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => {
+                    console.log('✅ ServiceWorker berhasil didaftarkan:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('❌ Gagal mendaftarkan ServiceWorker:', error);
+                });
+        });
+    }
+</script>
+</body>
+</html>
